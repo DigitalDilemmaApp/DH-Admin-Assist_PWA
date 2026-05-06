@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Class Visit">
+  <meta name="description" content="Departmental Head Class Visit Forms">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" id="apple-touch-icon-link" href="icons/icon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <title>Class Visit Forms</title>
+</head>
+<body>
+
+<!-- ======================== SETTINGS OVERLAY ======================== -->
+<div id="settings-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="School Settings">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>School Settings</h2>
+      <button class="modal-close-btn" id="cancel-settings-btn" aria-label="Close settings">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label for="setting-school-name">School Name</label>
+      <input type="text" id="setting-school-name" class="form-input" placeholder="e.g. Sunrise Primary School">
+    </div>
+
+    <div class="form-group">
+      <label for="setting-dh-name">Departmental Head (DH) Name</label>
+      <input type="text" id="setting-dh-name" class="form-input" placeholder="e.g. Mrs. J. Smith" autocomplete="off">
+    </div>
+
+    <div class="form-group">
+      <label>School Logo</label>
+      <div class="logo-upload-area" id="logo-upload-area" role="button" tabindex="0" aria-label="Upload school logo">
+        <img id="logo-preview" class="logo-preview-img hidden" alt="School logo preview">
+        <div id="logo-upload-placeholder">
+          <span class="upload-icon">🖼</span>
+          <span>Tap to upload logo (PNG / JPG)</span>
+        </div>
+        <input type="file" id="setting-logo-input" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" aria-label="Choose logo file">
+      </div>
+      <button class="btn btn-ghost btn-sm hidden" id="remove-logo-btn">Remove Logo</button>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="cancel-settings-btn-2">Cancel</button>
+      <button class="btn btn-primary" id="save-settings-btn">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== APP HEADER ======================== -->
+<header id="app-header">
+  <div class="header-inner">
+    <div class="header-branding">
+      <img id="header-logo" class="header-logo hidden" alt="School Logo">
+      <div class="header-text">
+        <h1 id="header-school-name"></h1>
+        <span id="header-dh-name" class="header-dh hidden"></span>
+      </div>
+    </div>
+    <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Open settings">⚙</button>
+  </div>
+  <div class="form-title-bar">
+    <span id="form-title-label">Notice of Class Visit</span>
+  </div>
+</header>
+
+<!-- ======================== MAIN CONTENT ======================== -->
+<main id="main-content">
+
+  <!-- ---- FORM 1: Notice of Class Visit ---- -->
+  <section id="form-1" class="form-section active" aria-label="Form 1: Notice of Class Visit">
+    <div class="form-container">
+      <div class="import-bar">
+        <button class="btn btn-ghost btn-sm" id="import-json-btn" type="button">↑ Import saved visit (.json)</button>
+        <input type="file" id="import-json-input" accept=".json" aria-label="Import saved visit JSON file">
+      </div>
+      <h2 class="form-heading">Notice of Class Visit</h2>
+
+      <div class="field-row">
+        <div class="form-group flex-1">
+          <label for="f1-notice-date">Notice Date</label>
+          <input type="date" id="f1-notice-date" class="form-input">
+        </div>
+        <div class="form-group flex-1">
+          <label for="f1-educator-name">Educator Name</label>
+          <input type="text" id="f1-educator-name" class="form-input" placeholder="Full name" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="form-group flex-1">
+          <label for="f1-grade">Grade</label>
+          <input type="text" id="f1-grade" class="form-input" placeholder="e.g. Grade 4" autocomplete="off">
+        </div>
+        <div class="form-group flex-1">
+          <label for="f1-date">Visit Date</label>
+          <input type="date" id="f1-date" class="form-input">
+        </div>
+        <div class="form-group flex-1">
+          <label for="f1-time">Visit Time</label>
+          <input type="time" id="f1-time" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="group-label">Purpose of Visit <span class="label-hint">(select one or more)</span></label>
+        <div class="checkbox-group">
+          <label class="checkbox-item">
+            <input type="checkbox" id="f1-lesson-obs">
+            <span class="check-box"></span>
+            <span class="checkbox-label">Lesson Observation</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" id="f1-classroom-obs">
+            <span class="check-box"></span>
+            <span class="checkbox-label">Classroom Observation</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" id="f1-learner-books">
+            <span class="check-box"></span>
+            <span class="checkbox-label">Learner Book Moderation</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" id="f1-educator-file">
+            <span class="check-box"></span>
+            <span class="checkbox-label">Educator File Moderation</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" id="f1-curriculum">
+            <span class="check-box"></span>
+            <span class="checkbox-label">Tracking of Curriculum</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="f1-designation">Designation</label>
+        <input type="text" id="f1-designation" class="form-input" placeholder="e.g. Head of Department" autocomplete="off">
+      </div>
+
+      <div class="section-actions">
+        <button class="btn btn-ghost btn-sm" id="section-print-btn-1"><span class="btn-icon">🖨</span> Print this page</button>
+        <button class="btn btn-ghost btn-sm" id="section-pdf-btn-1"><span class="btn-icon">⬇</span> Download PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- FORM 2: Classroom Observation ---- -->
+  <section id="form-2" class="form-section" aria-label="Form 2: Classroom Observation">
+    <div class="form-container">
+      <h2 class="form-heading">Classroom Observation</h2>
+
+      <div class="field-row">
+        <div class="form-group flex-2">
+          <label for="f2-educator-name">Educator Name</label>
+          <input type="text" id="f2-educator-name" class="form-input" placeholder="Full name" autocomplete="off">
+        </div>
+        <div class="form-group flex-1">
+          <label for="f2-date">Date</label>
+          <input type="date" id="f2-date" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="group-label">Observation Checklist</label>
+        <div class="toggle-table">
+          <div class="toggle-table-header">
+            <span class="toggle-col-label">Item</span>
+            <span class="toggle-col-value">Response</span>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f2-lesson-obs">
+              <span class="toggle-item-label">Lesson Observation</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f2-lesson-obs" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f2-lesson-obs" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f2-lesson-obs-comment-wrap">
+              <textarea id="f2-lesson-obs-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f2-classroom-obs">
+              <span class="toggle-item-label">Classroom Observation</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f2-classroom-obs" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f2-classroom-obs" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f2-classroom-obs-comment-wrap">
+              <textarea id="f2-classroom-obs-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f2-learner-books">
+              <span class="toggle-item-label">Learners Book Moderation</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f2-learner-books" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f2-learner-books" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f2-learner-books-comment-wrap">
+              <textarea id="f2-learner-books-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f2-educator-file">
+              <span class="toggle-item-label">Educator File Moderation</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f2-educator-file" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f2-educator-file" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f2-educator-file-comment-wrap">
+              <textarea id="f2-educator-file-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f2-lesson-file">
+              <span class="toggle-item-label">Lesson File</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f2-lesson-file" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f2-lesson-file" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f2-lesson-file-comment-wrap">
+              <textarea id="f2-lesson-file-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f2-curriculum">
+              <span class="toggle-item-label">Tracking of Curriculum</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f2-curriculum" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f2-curriculum" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f2-curriculum-comment-wrap">
+              <textarea id="f2-curriculum-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f2-assessment-file">
+              <span class="toggle-item-label">Assessment File</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f2-assessment-file" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f2-assessment-file" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f2-assessment-file-comment-wrap">
+              <textarea id="f2-assessment-file-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="f2-comments">General Comments</label>
+        <div class="pencil-textarea-wrap">
+          <textarea id="f2-comments" class="form-textarea pencil-area" rows="8"
+            placeholder="Enter general comments here…  (Apple Pencil supported on this field)"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="group-label">Signatures</label>
+        <div class="sig-grid">
+          <div class="signature-block">
+            <div class="sig-title">Moderator</div>
+            <div class="sig-canvas-wrap">
+              <canvas class="sig-canvas" id="sig-f2-moderator"></canvas>
+              <button class="clear-sig-btn" data-target="sig-f2-moderator" aria-label="Clear moderator signature">Clear</button>
+            </div>
+            <div class="form-group sig-date-group">
+              <label for="sig-f2-moderator-date">Date</label>
+              <input type="date" id="sig-f2-moderator-date" class="form-input">
+            </div>
+          </div>
+
+          <div class="signature-block">
+            <div class="sig-title">Deputy Principal</div>
+            <div class="sig-canvas-wrap">
+              <canvas class="sig-canvas" id="sig-f2-deputy"></canvas>
+              <button class="clear-sig-btn" data-target="sig-f2-deputy" aria-label="Clear deputy principal signature">Clear</button>
+            </div>
+            <div class="form-group sig-date-group">
+              <label for="sig-f2-deputy-date">Date</label>
+              <input type="date" id="sig-f2-deputy-date" class="form-input">
+            </div>
+          </div>
+
+          <div class="signature-block">
+            <div class="sig-title">Teacher</div>
+            <div class="sig-canvas-wrap">
+              <canvas class="sig-canvas" id="sig-f2-teacher"></canvas>
+              <button class="clear-sig-btn" data-target="sig-f2-teacher" aria-label="Clear teacher signature">Clear</button>
+            </div>
+            <div class="form-group sig-date-group">
+              <label for="sig-f2-teacher-date">Date</label>
+              <input type="date" id="sig-f2-teacher-date" class="form-input">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-actions">
+        <button class="btn btn-ghost btn-sm" id="section-print-btn-2"><span class="btn-icon">🖨</span> Print this page</button>
+        <button class="btn btn-ghost btn-sm" id="section-pdf-btn-2"><span class="btn-icon">⬇</span> Download PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- FORM 3: Book Moderation ---- -->
+  <section id="form-3" class="form-section" aria-label="Form 3: Book Moderation">
+    <div class="form-container">
+      <h2 class="form-heading">Book Moderation</h2>
+
+      <div class="field-row">
+        <div class="form-group flex-2">
+          <label for="f3-educator-name">Educator Name</label>
+          <input type="text" id="f3-educator-name" class="form-input" placeholder="Full name" autocomplete="off">
+        </div>
+        <div class="form-group flex-1">
+          <label for="f3-date">Date</label>
+          <input type="date" id="f3-date" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="group-label">Book Moderation Checklist</label>
+        <div class="toggle-table">
+          <div class="toggle-table-header">
+            <span class="toggle-col-label">Question</span>
+            <span class="toggle-col-value">Response</span>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-work-uptodate">
+              <span class="toggle-item-label">Is the work up to date?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-work-uptodate" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-work-uptodate" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-work-uptodate-comment-wrap">
+              <textarea id="f3-work-uptodate-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-books-marked">
+              <span class="toggle-item-label">Are the books properly marked up to date?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-books-marked" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-books-marked" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-books-marked-comment-wrap">
+              <textarea id="f3-books-marked-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-books-signed">
+              <span class="toggle-item-label">Are the books regularly signed and dated?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-books-signed" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-books-signed" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-books-signed-comment-wrap">
+              <textarea id="f3-books-signed-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-corrections">
+              <span class="toggle-item-label">Are the corrections done and checked?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-corrections" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-corrections" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-corrections-comment-wrap">
+              <textarea id="f3-corrections-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-books-neat">
+              <span class="toggle-item-label">Are the books neat and reasonably maintained?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-books-neat" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-books-neat" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-books-neat-comment-wrap">
+              <textarea id="f3-books-neat-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-daily-writing">
+              <span class="toggle-item-label">Are there daily writing activities?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-daily-writing" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-daily-writing" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-daily-writing-comment-wrap">
+              <textarea id="f3-daily-writing-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-weekly-tests">
+              <span class="toggle-item-label">Are there weekly spelling / mental / speed tests?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-weekly-tests" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-weekly-tests" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-weekly-tests-comment-wrap">
+              <textarea id="f3-weekly-tests-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-progression">
+              <span class="toggle-item-label">Is Progression evident?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-progression" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-progression" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-progression-comment-wrap">
+              <textarea id="f3-progression-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <div class="toggle-row" data-field="f3-differentiated">
+              <span class="toggle-item-label">Are there differentiated activities for intervention / extension?</span>
+              <div class="yes-no-group">
+                <button class="yn-btn yn-yes" data-field="f3-differentiated" data-value="YES">YES</button>
+                <button class="yn-btn yn-no"  data-field="f3-differentiated" data-value="NO">NO</button>
+              </div>
+            </div>
+            <div class="toggle-comment-wrap hidden" id="f3-differentiated-comment-wrap">
+              <textarea id="f3-differentiated-comment" class="toggle-comment" rows="2" placeholder="Comment on this item…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="group-label">Learner Book Review</label>
+        <div class="learner-table">
+          <div class="learner-table-head">
+            <span>Learner Name</span>
+            <span>Comment</span>
+            <span>Photo</span>
+          </div>
+          <div class="learner-row">
+            <input type="text" id="f3-l1-name"    class="form-input" placeholder="Learner 1 name" autocomplete="off">
+            <input type="text" id="f3-l1-comment" class="form-input" placeholder="Comment">
+            <div class="learner-photo-cell">
+              <button class="camera-btn" id="f3-l1-camera-btn" type="button" aria-label="Capture evidence photo for Learner 1">📷</button>
+              <input type="file" id="f3-l1-photo-input" class="learner-photo-input" accept="image/*" capture="environment" aria-label="Photo for Learner 1">
+              <div class="photo-thumb-wrap hidden" id="f3-l1-photo-thumb-wrap">
+                <img class="photo-thumb" id="f3-l1-photo-thumb" alt="Evidence photo">
+                <button class="photo-remove-btn" id="f3-l1-photo-remove" type="button" aria-label="Remove photo for Learner 1">×</button>
+              </div>
+            </div>
+          </div>
+          <div class="learner-row">
+            <input type="text" id="f3-l2-name"    class="form-input" placeholder="Learner 2 name" autocomplete="off">
+            <input type="text" id="f3-l2-comment" class="form-input" placeholder="Comment">
+            <div class="learner-photo-cell">
+              <button class="camera-btn" id="f3-l2-camera-btn" type="button" aria-label="Capture evidence photo for Learner 2">📷</button>
+              <input type="file" id="f3-l2-photo-input" class="learner-photo-input" accept="image/*" capture="environment" aria-label="Photo for Learner 2">
+              <div class="photo-thumb-wrap hidden" id="f3-l2-photo-thumb-wrap">
+                <img class="photo-thumb" id="f3-l2-photo-thumb" alt="Evidence photo">
+                <button class="photo-remove-btn" id="f3-l2-photo-remove" type="button" aria-label="Remove photo for Learner 2">×</button>
+              </div>
+            </div>
+          </div>
+          <div class="learner-row">
+            <input type="text" id="f3-l3-name"    class="form-input" placeholder="Learner 3 name" autocomplete="off">
+            <input type="text" id="f3-l3-comment" class="form-input" placeholder="Comment">
+            <div class="learner-photo-cell">
+              <button class="camera-btn" id="f3-l3-camera-btn" type="button" aria-label="Capture evidence photo for Learner 3">📷</button>
+              <input type="file" id="f3-l3-photo-input" class="learner-photo-input" accept="image/*" capture="environment" aria-label="Photo for Learner 3">
+              <div class="photo-thumb-wrap hidden" id="f3-l3-photo-thumb-wrap">
+                <img class="photo-thumb" id="f3-l3-photo-thumb" alt="Evidence photo">
+                <button class="photo-remove-btn" id="f3-l3-photo-remove" type="button" aria-label="Remove photo for Learner 3">×</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="group-label">Signatures</label>
+        <div class="sig-grid sig-grid-2">
+          <div class="signature-block">
+            <div class="sig-title">Moderator</div>
+            <div class="sig-canvas-wrap">
+              <canvas class="sig-canvas" id="sig-f3-moderator"></canvas>
+              <button class="clear-sig-btn" data-target="sig-f3-moderator" aria-label="Clear moderator signature">Clear</button>
+            </div>
+            <div class="form-group sig-date-group">
+              <label for="sig-f3-moderator-date">Date</label>
+              <input type="date" id="sig-f3-moderator-date" class="form-input">
+            </div>
+          </div>
+
+          <div class="signature-block">
+            <div class="sig-title">Deputy Principal</div>
+            <div class="sig-canvas-wrap">
+              <canvas class="sig-canvas" id="sig-f3-deputy"></canvas>
+              <button class="clear-sig-btn" data-target="sig-f3-deputy" aria-label="Clear deputy principal signature">Clear</button>
+            </div>
+            <div class="form-group sig-date-group">
+              <label for="sig-f3-deputy-date">Date</label>
+              <input type="date" id="sig-f3-deputy-date" class="form-input">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-actions">
+        <button class="btn btn-ghost btn-sm" id="section-print-btn-3"><span class="btn-icon">🖨</span> Print this page</button>
+        <button class="btn btn-ghost btn-sm" id="section-pdf-btn-3"><span class="btn-icon">⬇</span> Download PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- COMPLETION SCREEN ---- -->
+  <section id="completion-screen" class="form-section" aria-label="Completion screen">
+    <div class="form-container completion-wrap">
+      <div class="completion-icon">✓</div>
+      <h2 class="completion-title">Forms Complete!</h2>
+      <p class="completion-subtitle">All three forms have been completed. Choose a save format below, or print.</p>
+
+      <div class="completion-actions">
+        <button class="btn btn-primary btn-xl" id="download-pdf-btn">
+          <span class="btn-icon">⬇</span> Save as PDF
+        </button>
+        <button class="btn btn-secondary btn-xl" id="download-pdf-json-btn">
+          <span class="btn-icon">⬇</span> Save as PDF + JSON
+        </button>
+        <button class="btn btn-ghost btn-xl" id="download-json-btn">
+          <span class="btn-icon">⬇</span> Save as JSON only
+        </button>
+        <button class="btn btn-secondary btn-xl" id="print-btn">
+          <span class="btn-icon">🖨</span> Print Forms
+        </button>
+        <button class="btn btn-ghost btn-xl" id="start-over-btn">
+          Start New Visit
+        </button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ======================== NAV FOOTER ======================== -->
+<footer id="nav-footer">
+  <div class="nav-inner">
+    <button class="btn btn-secondary nav-btn" id="back-btn" disabled>‹ Back</button>
+
+    <div class="step-dots" aria-label="Progress">
+      <span class="step-dot active" data-step="1"></span>
+      <span class="step-dot" data-step="2"></span>
+      <span class="step-dot" data-step="3"></span>
+    </div>
+
+    <button class="btn btn-primary nav-btn" id="next-btn">Next ›</button>
+  </div>
+</footer>
+
+<!-- ======================== PRINT TEMPLATES ======================== -->
+<!-- Rendered only during window.print() -->
+<div id="print-root" class="print-only">
+  <div id="print-form1-page" class="print-page"></div>
+  <div id="print-form2-page" class="print-page"></div>
+  <div id="print-form3-page" class="print-page"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
