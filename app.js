@@ -409,6 +409,8 @@ function initCanvas(canvas) {
 
   canvas.width  = cssW * dpr;
   canvas.height = cssH * dpr;
+  canvas.style.width  = cssW + 'px';
+  canvas.style.height = cssH + 'px';
   ctx.scale(dpr, dpr);
 
   drawCanvasPlaceholder(canvas, ctx, cssW, cssH);
@@ -449,7 +451,7 @@ function initCanvas(canvas) {
     ctx.moveTo(lastX, lastY);
     ctx.lineTo(p.x, p.y);
     ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth   = e.pointerType === 'pen' ? pressure * 3.5 : 2;
+    ctx.lineWidth   = e.pointerType === 'pen' ? pressure * 3.5 : 2.5;
     ctx.lineCap     = 'round';
     ctx.lineJoin    = 'round';
     ctx.stroke();
