@@ -560,12 +560,42 @@
         <button class="btn btn-secondary btn-xl" id="print-btn">
           <span class="btn-icon">🖨</span> Print Forms
         </button>
+
+        <!-- Install App button — shown by JS based on platform -->
+        <button class="btn btn-ghost btn-xl hidden" id="completion-install-btn">
+          <span class="btn-icon">📲</span> Install App
+        </button>
+
         <button class="btn btn-ghost btn-xl" id="start-over-btn">
           Start New Visit
         </button>
       </div>
     </div>
   </section>
+
+  <!-- ---- iOS INSTALL INSTRUCTIONS MODAL ---- -->
+  <div id="ios-install-modal" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Install instructions">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Install This App</h2>
+        <button class="modal-close-btn" id="ios-install-modal-close" aria-label="Close">✕</button>
+      </div>
+      <div style="text-align:center; padding: 8px 0 16px;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">📲</div>
+        <p style="font-size: 1rem; color: #2c3e50; line-height: 1.7; margin-bottom: 16px;">
+          To install this app on your iPad or iPhone:
+        </p>
+        <div style="background:#f4f6f8; border-radius:12px; padding:16px; text-align:left;">
+          <p style="margin-bottom:10px;">1️⃣ &nbsp;Tap the <strong>Share</strong> button <strong>(□↑)</strong> at the bottom of Safari</p>
+          <p style="margin-bottom:10px;">2️⃣ &nbsp;Scroll down and tap <strong>"Add to Home Screen"</strong></p>
+          <p>3️⃣ &nbsp;Tap <strong>"Add"</strong> — done! The app icon will appear on your home screen.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="ios-install-modal-done">Got it!</button>
+      </div>
+    </div>
+  </div>
 
 </main>
 

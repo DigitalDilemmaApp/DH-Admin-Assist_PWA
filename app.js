@@ -48,6 +48,7 @@ const state = {
 document.addEventListener('DOMContentLoaded', () => {
   registerSW();
   initInstallBanner();
+  setupInstallButton();
   loadSettings();
   updateHeader();
   setupSettings();
@@ -73,11 +74,23 @@ function registerSW() {
   }
 }
 
-/* ── Install Banner (iOS) ───────────────────────────────── */
+/* ── Install Prompt ─────────────────────────────────────── */
+let _androidInstallPrompt = null; /* stores Android beforeinstallprompt event */
+
+/* Capture Android install prompt early — must be at top level */
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _androidInstallPrompt = e;
+  showCompletionInstallBtn(); /* show button if completion screen already visible */
+});
+
 function initInstallBanner() {
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isStandalone = window.navigator.standalone === true;
-  const dismissed = localStorage.getItem('installBannerDismissed');
+  const isIOS        = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true ||
+                       window.matchMedia('(display-mode: standalone)').matches;
+  const dismissed    = localStorage.getItem('installBannerDismissed');
+
+  /* iOS top banner — first visit only */
   if (isIOS && !isStandalone && !dismissed) {
     document.getElementById('install-banner').style.display = 'block';
   }
@@ -86,6 +99,53 @@ function initInstallBanner() {
 function dismissInstallBanner() {
   document.getElementById('install-banner').style.display = 'none';
   localStorage.setItem('installBannerDismissed', 'true');
+}
+
+/* Show/hide the Install App button on the completion screen */
+function showCompletionInstallBtn() {
+  const isStandalone = window.navigator.standalone === true ||
+                       window.matchMedia('(display-mode: standalone)').matches;
+  if (isStandalone) return; /* already installed */
+
+  const isIOS     = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const hasAndroid = !!_androidInstallPrompt;
+
+  const btn = document.getElementById('completion-install-btn');
+  if (btn && (isIOS || hasAndroid)) {
+    btn.classList.remove('hidden');
+  }
+}
+
+function setupInstallButton() {
+  const btn = document.getElementById('completion-install-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    if (_androidInstallPrompt) {
+      /* Android — trigger native install dialog */
+      _androidInstallPrompt.prompt();
+      _androidInstallPrompt.userChoice.then(() => {
+        _androidInstallPrompt = null;
+        btn.classList.add('hidden');
+      });
+    } else if (isIOS) {
+      /* iOS — show step-by-step instructions modal */
+      document.getElementById('ios-install-modal').classList.remove('hidden');
+    }
+  });
+
+  /* Close iOS modal */
+  document.getElementById('ios-install-modal-close').addEventListener('click', closeIOSModal);
+  document.getElementById('ios-install-modal-done').addEventListener('click',  closeIOSModal);
+  document.getElementById('ios-install-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('ios-install-modal')) closeIOSModal();
+  });
+}
+
+function closeIOSModal() {
+  document.getElementById('ios-install-modal').classList.add('hidden');
 }
 
 /* ── Apple Touch Icon (dynamic) ─────────────────────────── */
@@ -341,6 +401,9 @@ function submitForms() {
 
   /* Mark all dots done */
   document.querySelectorAll('.step-dot').forEach(d => d.classList.add('done'));
+
+  /* Show install button if applicable */
+  showCompletionInstallBtn();
 }
 
 function updateNavUI() {
