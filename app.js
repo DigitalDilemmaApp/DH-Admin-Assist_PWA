@@ -47,6 +47,7 @@ const state = {
 /* ── Initialisation ─────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   registerSW();
+  initInstallBanner();
   loadSettings();
   updateHeader();
   setupSettings();
@@ -70,6 +71,21 @@ function registerSW() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
+}
+
+/* ── Install Banner (iOS) ───────────────────────────────── */
+function initInstallBanner() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const dismissed = localStorage.getItem('installBannerDismissed');
+  if (isIOS && !isStandalone && !dismissed) {
+    document.getElementById('install-banner').style.display = 'block';
+  }
+}
+
+function dismissInstallBanner() {
+  document.getElementById('install-banner').style.display = 'none';
+  localStorage.setItem('installBannerDismissed', 'true');
 }
 
 /* ── Apple Touch Icon (dynamic) ─────────────────────────── */
