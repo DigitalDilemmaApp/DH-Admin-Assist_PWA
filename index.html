@@ -52,6 +52,15 @@
       <button class="btn btn-ghost btn-sm hidden" id="remove-logo-btn">Remove Logo</button>
     </div>
 
+    <div class="form-group">
+      <label class="group-label">Display</label>
+      <label class="checkbox-item" style="cursor:pointer;">
+        <input type="checkbox" id="setting-dark-mode">
+        <span class="check-box"></span>
+        <span class="checkbox-label">Dark Mode</span>
+      </label>
+    </div>
+
     <div class="form-group" id="settings-install-group">
       <label class="group-label">Install App</label>
       <button class="btn btn-secondary" id="settings-install-btn" type="button" style="width:100%;">
@@ -69,6 +78,38 @@
   </div>
 </div>
 
+<!-- ======================== HISTORY OVERLAY ======================== -->
+<div id="history-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Visit History">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h2>Visit History</h2>
+      <button class="modal-close-btn" id="close-history-btn" aria-label="Close history">✕</button>
+    </div>
+    <div id="history-list" style="max-height:60vh; overflow-y:auto; margin:0 -24px; padding:0 24px;">
+    </div>
+  </div>
+</div>
+
+<!-- ======================== DASHBOARD OVERLAY ======================== -->
+<div id="dashboard-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Summary Dashboard">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <h2>Summary Dashboard</h2>
+      <button class="modal-close-btn" id="close-dashboard-btn" aria-label="Close dashboard">✕</button>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <select id="dashboard-teacher-select" class="form-input">
+        <option value="">— Select a teacher —</option>
+      </select>
+    </div>
+
+    <div id="dashboard-content" style="max-height:65vh; overflow-y:auto;">
+      <p style="color:var(--grey-mid); text-align:center; padding:24px;">Select a teacher to view their stats.</p>
+    </div>
+  </div>
+</div>
+
 <!-- ======================== APP HEADER ======================== -->
 <header id="app-header">
   <div class="header-inner">
@@ -79,6 +120,8 @@
         <span id="header-dh-name" class="header-dh hidden"></span>
       </div>
     </div>
+    <button class="btn btn-ghost btn-sm" id="dashboard-btn" style="color:white; border-color:rgba(255,255,255,0.3);" title="Summary Dashboard" aria-label="Open summary dashboard">📊 Dashboard</button>
+    <button class="btn btn-ghost btn-sm" id="history-btn" style="color:white; border-color:rgba(255,255,255,0.3);" title="Visit History" aria-label="Open visit history">🕐 History</button>
     <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Open settings">⚙</button>
   </div>
   <div class="form-title-bar">
@@ -105,7 +148,13 @@
         </div>
         <div class="form-group flex-1">
           <label for="f1-educator-name">Educator Name</label>
-          <input type="text" id="f1-educator-name" class="form-input" placeholder="Full name" autocomplete="off">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="f1-educator-name" class="form-input" placeholder="Full name" autocomplete="off" style="flex:1;">
+            <button class="btn btn-secondary btn-sm" id="save-teacher-btn" type="button" title="Save as profile">💾</button>
+          </div>
+          <select id="f1-teacher-select" class="form-input" style="margin-top:8px;">
+            <option value="">— Load saved teacher —</option>
+          </select>
         </div>
       </div>
 
@@ -113,6 +162,10 @@
         <div class="form-group flex-1">
           <label for="f1-grade">Grade</label>
           <input type="text" id="f1-grade" class="form-input" placeholder="e.g. Grade 4" autocomplete="off">
+        </div>
+        <div class="form-group flex-1">
+          <label for="f1-subject">Subject</label>
+          <input type="text" id="f1-subject" class="form-input" placeholder="e.g. Mathematics" autocomplete="off">
         </div>
         <div class="form-group flex-1">
           <label for="f1-date">Visit Date</label>
@@ -324,6 +377,16 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label for="f2-action-steps">Action Steps / Recommendations</label>
+        <textarea id="f2-action-steps" class="form-textarea pencil-area" rows="4" placeholder="What must the teacher action before the next visit…"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="f2-followup-date">Follow-up Date</label>
+        <input type="date" id="f2-followup-date" class="form-input">
       </div>
 
       <div class="section-actions">
@@ -560,6 +623,9 @@
       <div class="completion-actions">
         <button class="btn btn-primary btn-xl" id="download-pdf-btn">
           <span class="btn-icon">⬇</span> Save as PDF
+        </button>
+        <button class="btn btn-secondary btn-xl" id="email-pdf-btn">
+          <span class="btn-icon">✉</span> Email PDF
         </button>
         <button class="btn btn-secondary btn-xl" id="download-pdf-json-btn">
           <span class="btn-icon">⬇</span> Save as PDF + JSON

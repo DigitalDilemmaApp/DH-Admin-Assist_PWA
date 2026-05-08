@@ -6,6 +6,8 @@
 /* ── Constants ──────────────────────────────────────────── */
 const STORAGE_KEY_SETTINGS = 'hps-cv-settings';
 const STORAGE_KEY_FORMS    = 'hps-cv-forms';
+const STORAGE_KEY_TEACHERS = 'hps-cv-teachers';
+const STORAGE_KEY_HISTORY  = 'hps-cv-history';
 const TOGGLE_FIELDS = {
   2: ['f2-lesson-obs','f2-classroom-obs','f2-learner-books','f2-educator-file','f2-lesson-file','f2-curriculum','f2-assessment-file'],
   3: ['f3-work-uptodate','f3-books-marked','f3-books-signed','f3-corrections','f3-books-neat','f3-daily-writing','f3-weekly-tests','f3-progression','f3-differentiated']
@@ -37,6 +39,7 @@ const state = {
     schoolName: '',
     dhName: '',
     logoDataUrl: null,
+    darkMode: false,
     firstLaunch: true
   },
   toggleValues: {},   /* field → 'YES' | 'NO' | null */
@@ -50,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initInstallBanner();
   setupInstallButton();
   loadSettings();
+  setupDarkMode();
   updateHeader();
   setupSettings();
   setupSettingsInstallBtn();
@@ -58,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSectionActions();
   setupImportJSON();
   setupLearnerCameras();
+  setupTeacherProfiles();
+  setupHistoryModal();
+  setupDashboard();
   restoreFormData();
   applySettingsToForms();
   setupAutosave();
@@ -339,6 +346,7 @@ function openSettings() {
     removeLogo.classList.add('hidden');
   }
   logoInput._pendingUrl = undefined; /* reset pending */
+  document.getElementById('setting-dark-mode').checked = !!state.settings.darkMode;
 
   overlay.classList.remove('hidden');
   nameInput.focus();
@@ -346,6 +354,26 @@ function openSettings() {
 
 function closeSettings() {
   document.getElementById('settings-overlay').classList.add('hidden');
+}
+
+/* ── Dark Mode ───────────────────────────────────────────── */
+function applyDarkMode(enabled) {
+  document.body.classList.toggle('dark-mode', enabled);
+}
+
+function setupDarkMode() {
+  applyDarkMode(state.settings.darkMode);
+
+  const toggle = document.getElementById('setting-dark-mode');
+  if (!toggle) return;
+
+  toggle.checked = state.settings.darkMode;
+
+  toggle.addEventListener('change', () => {
+    state.settings.darkMode = toggle.checked;
+    applyDarkMode(toggle.checked);
+    persistSettings();
+  });
 }
 
 /* Pre-fill form fields from settings when the fields are currently empty */
@@ -366,6 +394,7 @@ function setupNavigation() {
   document.getElementById('back-btn').addEventListener('click', handleBack);
   document.getElementById('next-btn').addEventListener('click', handleNext);
   document.getElementById('download-pdf-btn').addEventListener('click', downloadPDF);
+  document.getElementById('email-pdf-btn').addEventListener('click', emailPDF);
   document.getElementById('download-pdf-json-btn').addEventListener('click', downloadPDFAndJSON);
   document.getElementById('download-json-btn').addEventListener('click', downloadJSON);
   document.getElementById('print-btn').addEventListener('click', printForms);
@@ -424,6 +453,7 @@ function navigateTo(step) {
 }
 
 function submitForms() {
+  saveVisitToHistory();
   saveFormData();
   /* Show completion */
   document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
@@ -648,6 +678,7 @@ function collectFormData() {
       noticeDate:   val('f1-notice-date'),
       educatorName: val('f1-educator-name'),
       grade:        val('f1-grade'),
+      subject:      val('f1-subject'),
       date:         val('f1-date'),
       time:         val('f1-time'),
       purposes: {
@@ -665,6 +696,8 @@ function collectFormData() {
       toggles:         { ...state.toggleValues },
       toggleComments:  collectToggleComments(TOGGLE_FIELDS[2]),
       comments:        val('f2-comments'),
+      actionSteps:     val('f2-action-steps'),
+      followUpDate:    val('f2-followup-date'),
       signatures: {
         moderator: { dataUrl: getCanvasDataUrl('sig-f2-moderator'), date: val('sig-f2-moderator-date') },
         deputy:    { dataUrl: getCanvasDataUrl('sig-f2-deputy'),    date: val('sig-f2-deputy-date')    },
@@ -703,6 +736,7 @@ function applyFormData(data) {
   setVal('f1-notice-date',   f1.noticeDate);
   setVal('f1-educator-name', f1.educatorName);
   setVal('f1-grade',         f1.grade);
+  setVal('f1-subject',       f1.subject);
   setVal('f1-date',          f1.date);
   setVal('f1-time',          f1.time);
   setVal('f1-designation',   f1.designation);
@@ -719,6 +753,8 @@ function applyFormData(data) {
   setVal('f2-educator-name', f2.educatorName);
   setVal('f2-date',          f2.date);
   setVal('f2-comments',      f2.comments);
+  setVal('f2-action-steps',  f2.actionSteps);
+  setVal('f2-followup-date', f2.followUpDate);
   if (f2.signatures) {
     setVal('sig-f2-moderator-date', f2.signatures.moderator?.date);
     setVal('sig-f2-deputy-date',    f2.signatures.deputy?.date);
@@ -1025,6 +1061,7 @@ function buildDoc(jsPDF, data, settings, sections = [1, 2, 3]) {
   leftY  = field('Notice Date', fmtDate(data.f1.noticeDate), col1, leftY, colW);
   rightY = field('Educator Name', data.f1.educatorName, col2, rightY, colW);
   leftY  = field('Grade', data.f1.grade, col1, leftY, colW);
+  leftY  = field('Subject', data.f1.subject, col1, leftY, colW);
   rightY = field('Visit Date', fmtDate(data.f1.date), col2, rightY, colW);
   leftY  = field('Visit Time', data.f1.time, col1, leftY, colW);
   rightY = field('Designation', data.f1.designation, col2, rightY, colW);
@@ -1076,6 +1113,16 @@ function buildDoc(jsPDF, data, settings, sections = [1, 2, 3]) {
     doc.text(lines.slice(0, 10), M + 2, y + 5);
   }
   y += 36;
+
+  y = sectionTitle('Action Steps / Recommendations', M, y);
+  doc.setDrawColor(180,180,180).setLineWidth(0.3).rect(M, y, CW, 24);
+  if (data.f2.actionSteps) {
+    doc.setFont('helvetica','normal').setFontSize(9).setTextColor(...DARK);
+    const lines = doc.splitTextToSize(data.f2.actionSteps, CW - 4);
+    doc.text(lines.slice(0, 6), M + 2, y + 5);
+  }
+  y += 30;
+  y = field('Follow-up Date', fmtDate(data.f2.followUpDate), M, y, CW);
 
   /* Check page overflow */
   if (y > PH - 80) { doc.addPage(); y = pageHeader('CLASSROOM OBSERVATION (cont.)'); }
@@ -1167,6 +1214,51 @@ function buildDoc(jsPDF, data, settings, sections = [1, 2, 3]) {
   } // end Form 3
 
   return doc;
+}
+
+async function emailPDF() {
+  const jsPDF = window.jspdf?.jsPDF;
+  if (!jsPDF) {
+    alert('PDF library not loaded yet. Please connect to the internet once to cache it.');
+    return;
+  }
+
+  const btn = document.getElementById('email-pdf-btn');
+  btn.disabled = true;
+  btn.textContent = 'Preparing…';
+
+  try {
+    const data     = collectFormData();
+    const doc      = buildDoc(jsPDF, data, state.settings);
+    const name     = (data.f1.educatorName || 'class-visit').replace(/\s+/g, '-');
+    const date     = data.f1.date || new Date().toISOString().slice(0, 10);
+    const filename = `${name}-${date}.pdf`;
+
+    doc.save(filename);
+
+    const subject = encodeURIComponent(`Class Visit – ${data.f1.educatorName || ''} – ${fmtDate(data.f1.date) || date}`);
+    const body    = encodeURIComponent(
+      `Please find the class visit report attached.\n\n` +
+      `Teacher: ${data.f1.educatorName || '—'}\n` +
+      `Grade: ${data.f1.grade || '—'}\n` +
+      `Subject: ${data.f1.subject || '—'}\n` +
+      `Visit Date: ${fmtDate(data.f1.date) || '—'}\n` +
+      `Follow-up Date: ${fmtDate(data.f2.followUpDate) || '—'}\n\n` +
+      `Generated by DH Class Visit App.`
+    );
+
+    /* Short delay so the PDF download registers before mail opens */
+    setTimeout(() => {
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    }, 800);
+
+  } catch (err) {
+    console.error(err);
+    alert('Could not prepare email. Please use Save as PDF and attach it manually.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="btn-icon">✉</span> Email PDF';
+  }
 }
 
 /* ── Per-section Print & PDF ─────────────────────────────── */
@@ -1366,6 +1458,272 @@ function printForms() {
     }
   });
   window.print();
+}
+
+/* ── Summary Dashboard ───────────────────────────────────── */
+function populateDashboardTeacherSelect() {
+  const select = document.getElementById('dashboard-teacher-select');
+  if (!select) return;
+  const history = loadVisitHistory();
+  const teachers = [...new Set(history.map(r => r.f1?.educatorName).filter(Boolean))];
+  select.innerHTML = '<option value="">— Select a teacher —</option>';
+  teachers.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+}
+
+function renderDashboard(teacherName) {
+  const content = document.getElementById('dashboard-content');
+  if (!content) return;
+  const history = loadVisitHistory().filter(r => r.f1?.educatorName === teacherName);
+  if (history.length === 0) {
+    content.innerHTML = '<p style="color:var(--grey-mid); text-align:center; padding:24px;">No visits found for this teacher.</p>';
+    return;
+  }
+
+  const allFields = [...TOGGLE_FIELDS[2], ...TOGGLE_FIELDS[3]];
+
+  const stats = allFields.map(field => {
+    const responses = history.map(r => r.f2?.toggles?.[field] || r.f3?.toggles?.[field]).filter(Boolean);
+    const yes = responses.filter(v => v === 'YES').length;
+    const no  = responses.filter(v => v === 'NO').length;
+    const total = yes + no;
+    return { field, label: TOGGLE_LABELS[field], yes, no, total };
+  }).filter(s => s.total > 0);
+
+  const visitSummaries = history.map(r => `
+    <div style="padding:8px 0; border-bottom:1px solid var(--border); font-size:0.88rem; color:var(--grey-mid);">
+      <strong style="color:var(--grey-dark);">${fmtDate(r.f1?.date) || '—'}</strong>
+      · Grade ${r.f1?.grade || '—'} · ${r.f1?.subject || '—'}
+      · Saved ${formatHistoryDate(r.savedAt)}
+    </div>
+  `).join('');
+
+  const statRows = stats.map(s => {
+    const yesPct = s.total ? Math.round((s.yes / s.total) * 100) : 0;
+    const barColor = yesPct >= 80 ? 'var(--green)' : yesPct >= 50 ? '#e67e22' : 'var(--red)';
+    return `
+      <div style="margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; font-size:0.88rem; margin-bottom:4px;">
+          <span style="color:var(--grey-dark); flex:1;">${s.label}</span>
+          <span style="color:var(--green); font-weight:600; margin-left:8px;">${s.yes} YES</span>
+          <span style="color:var(--red); font-weight:600; margin-left:8px;">${s.no} NO</span>
+        </div>
+        <div style="height:10px; background:var(--grey-light); border-radius:6px; overflow:hidden;">
+          <div style="height:100%; width:${yesPct}%; background:${barColor}; border-radius:6px; transition:width .4s;"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  content.innerHTML = `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:0.82rem; font-weight:700; color:var(--grey-mid); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px;">
+        ${history.length} Visit${history.length > 1 ? 's' : ''} on Record
+      </div>
+      ${visitSummaries}
+    </div>
+    ${stats.length > 0 ? `
+      <div style="font-size:0.82rem; font-weight:700; color:var(--grey-mid); text-transform:uppercase; letter-spacing:.04em; margin-bottom:12px;">
+        Checklist Performance
+      </div>
+      ${statRows}
+    ` : '<p style="color:var(--grey-mid); text-align:center;">No checklist data available yet.</p>'}
+  `;
+}
+
+function openDashboardModal() {
+  populateDashboardTeacherSelect();
+  document.getElementById('dashboard-content').innerHTML = '<p style="color:var(--grey-mid); text-align:center; padding:24px;">Select a teacher to view their stats.</p>';
+  document.getElementById('dashboard-overlay').classList.remove('hidden');
+}
+
+function closeDashboardModal() {
+  document.getElementById('dashboard-overlay').classList.add('hidden');
+}
+
+function setupDashboard() {
+  document.getElementById('dashboard-btn').addEventListener('click', openDashboardModal);
+  document.getElementById('close-dashboard-btn').addEventListener('click', closeDashboardModal);
+  document.getElementById('dashboard-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('dashboard-overlay')) closeDashboardModal();
+  });
+  document.getElementById('dashboard-teacher-select').addEventListener('change', e => {
+    if (e.target.value) renderDashboard(e.target.value);
+  });
+}
+
+/* ── Visit History ───────────────────────────────────────── */
+function loadVisitHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || [];
+  } catch { return []; }
+}
+
+function saveVisitToHistory() {
+  try {
+    const history = loadVisitHistory();
+    const data = collectFormData();
+    history.unshift({
+      id:      Date.now().toString(),
+      savedAt: new Date().toISOString(),
+      ...data
+    });
+    localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history.slice(0, 50)));
+  } catch {}
+}
+
+function formatHistoryDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-ZA', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  } catch { return iso; }
+}
+
+function openVisitFromHistory(record) {
+  if (!confirm(`Load visit for ${record.f1?.educatorName || 'Unknown'} on ${fmtDate(record.f1?.date)}? This will replace the current form data.`)) return;
+  state.toggleValues   = {};
+  state.signedCanvases = new Set();
+  state.learnerPhotos  = {};
+  document.querySelectorAll('.form-section input, .form-section textarea').forEach(el => {
+    if (el.type === 'checkbox') el.checked = false;
+    else el.value = '';
+  });
+  document.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('active-yes','active-no'));
+  document.querySelectorAll('.toggle-comment-wrap').forEach(w => w.classList.add('hidden'));
+  document.querySelectorAll('.toggle-comment').forEach(t => { t.value = ''; });
+  document.querySelectorAll('.sig-canvas').forEach(c => { if (c._initialized) clearCanvas(c); });
+  [1,2,3].forEach(n => {
+    const thumb     = document.getElementById(`f3-l${n}-photo-thumb`);
+    const thumbWrap = document.getElementById(`f3-l${n}-photo-thumb-wrap`);
+    const cameraBtn = document.getElementById(`f3-l${n}-camera-btn`);
+    if (thumb)     thumb.src = '';
+    if (thumbWrap) thumbWrap.classList.add('hidden');
+    if (cameraBtn) cameraBtn.classList.remove('hidden');
+  });
+  applyFormData(record);
+  saveFormData();
+  closeHistoryModal();
+  navigateTo(1);
+}
+
+function deleteVisitFromHistory(id) {
+  if (!confirm('Delete this visit record? This cannot be undone.')) return;
+  const history = loadVisitHistory().filter(r => r.id !== id);
+  localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  const list = document.getElementById('history-list');
+  if (!list) return;
+  const history = loadVisitHistory();
+  if (history.length === 0) {
+    list.innerHTML = '<p style="color:var(--grey-mid); text-align:center; padding:24px;">No visits saved yet.</p>';
+    return;
+  }
+  list.innerHTML = history.map(r => `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--border); gap:12px;">
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:600; font-size:0.97rem; color:var(--grey-dark);">${r.f1?.educatorName || 'Unknown Teacher'}</div>
+        <div style="font-size:0.82rem; color:var(--grey-mid);">
+          ${r.f1?.grade || ''} ${r.f1?.subject ? '· ' + r.f1.subject : ''} · ${fmtDate(r.f1?.date) || '—'}
+        </div>
+        <div style="font-size:0.78rem; color:var(--grey-mid);">Saved: ${formatHistoryDate(r.savedAt)}</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-shrink:0;">
+        <button class="btn btn-secondary btn-sm" onclick="openVisitFromHistory(${JSON.stringify(r).replace(/"/g, '&quot;')})">Open</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="deleteVisitFromHistory('${r.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openHistoryModal() {
+  renderHistoryList();
+  document.getElementById('history-overlay').classList.remove('hidden');
+}
+
+function closeHistoryModal() {
+  document.getElementById('history-overlay').classList.add('hidden');
+}
+
+function setupHistoryModal() {
+  document.getElementById('history-btn').addEventListener('click', openHistoryModal);
+  document.getElementById('close-history-btn').addEventListener('click', closeHistoryModal);
+  document.getElementById('history-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('history-overlay')) closeHistoryModal();
+  });
+}
+
+/* ── Teacher Profiles ────────────────────────────────────── */
+function loadTeacherProfiles() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY_TEACHERS)) || [];
+  } catch { return []; }
+}
+
+function saveTeacherProfiles(profiles) {
+  try {
+    localStorage.setItem(STORAGE_KEY_TEACHERS, JSON.stringify(profiles));
+  } catch {}
+}
+
+function populateTeacherSelect() {
+  const select = document.getElementById('f1-teacher-select');
+  if (!select) return;
+  const profiles = loadTeacherProfiles();
+  select.innerHTML = '<option value="">— Load saved teacher —</option>';
+  profiles.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.name} — Grade ${p.grade} (${p.subject || 'No subject'})`;
+    select.appendChild(opt);
+  });
+}
+
+function setupTeacherProfiles() {
+  populateTeacherSelect();
+
+  document.getElementById('f1-teacher-select').addEventListener('change', e => {
+    const id = e.target.value;
+    if (!id) return;
+    const profiles = loadTeacherProfiles();
+    const profile = profiles.find(p => p.id === id);
+    if (!profile) return;
+    setVal('f1-educator-name', profile.name);
+    setVal('f1-grade', profile.grade);
+    setVal('f1-subject', profile.subject);
+    e.target.value = '';
+    saveFormData();
+  });
+
+  document.getElementById('save-teacher-btn').addEventListener('click', () => {
+    const name = val('f1-educator-name').trim();
+    if (!name) { alert('Please enter an educator name first.'); return; }
+    const profiles = loadTeacherProfiles();
+    const existing = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      existing.grade   = val('f1-grade');
+      existing.subject = val('f1-subject');
+      saveTeacherProfiles(profiles);
+      alert(`Profile updated for ${name}.`);
+    } else {
+      profiles.push({
+        id:      Date.now().toString(),
+        name,
+        grade:   val('f1-grade'),
+        subject: val('f1-subject')
+      });
+      saveTeacherProfiles(profiles);
+      alert(`Profile saved for ${name}.`);
+    }
+    populateTeacherSelect();
+  });
 }
 
 /* ── Utilities ───────────────────────────────────────────── */

@@ -1003,3 +1003,64 @@ label { font-size: 0.95rem; }
     padding-bottom: 4mm;
   }
 }
+
+/* ── Dark Mode ───────────────────────────────────────── */
+body.dark-mode {
+  --blue-dark:   #2471a3;
+  --blue-mid:    #2e86c1;
+  --blue-light:  #1a3a4a;
+  --green:       #1e8449;
+  --green-light: #1a3a2a;
+  --red:         #c0392b;
+  --red-light:   #3a1a1a;
+  --grey-dark:   #e8eaed;
+  --grey-mid:    #9aa0a6;
+  --grey-light:  #3c4043;
+  --grey-bg:     #202124;
+  --white:       #2d2f31;
+  --border:      #5f6368;
+  --shadow-sm:   0 1px 4px rgba(0,0,0,.3);
+  --shadow-md:   0 4px 16px rgba(0,0,0,.4);
+}
+
+body.dark-mode #app-header {
+  background: #1a1f2e;
+}
+
+body.dark-mode .modal {
+  background: #2d2f31;
+}
+
+body.dark-mode .overlay {
+  background: rgba(0,0,0,.75);
+}
+
+body.dark-mode .toggle-table-header,
+body.dark-mode .learner-table-head {
+  background: #1a3a4a !important;
+}
+
+body.dark-mode .checkbox-item:hover,
+body.dark-mode .toggle-row:hover {
+  background: #35373a;
+}
+
+body.dark-mode .yn-btn {
+  background: #35373a;
+  color: var(--grey-mid);
+}
+
+body.dark-mode .form-input,
+body.dark-mode .form-textarea,
+body.dark-mode .toggle-comment {
+  background: #35373a;
+  color: var(--grey-dark);
+}
+
+body.dark-mode .sig-canvas-wrap {
+  background: #35373a;
+}
+
+body.dark-mode .completion-wrap {
+  background: var(--grey-bg);
+}
