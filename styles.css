@@ -1052,9 +1052,25 @@ body.dark-mode .yn-btn {
 
 body.dark-mode .form-input,
 body.dark-mode .form-textarea,
-body.dark-mode .toggle-comment {
+body.dark-mode .toggle-comment,
+body.dark-mode select {
   background: #35373a;
-  color: var(--grey-dark);
+  color: #e8eaed;
+  border-color: #5f6368;
+  -webkit-text-fill-color: #e8eaed;
+  color-scheme: dark;
+}
+
+body.dark-mode .form-input::placeholder,
+body.dark-mode .form-textarea::placeholder {
+  color: #9aa0a6;
+}
+
+body.dark-mode input[type="date"],
+body.dark-mode input[type="time"] {
+  color-scheme: dark;
+  color: #e8eaed;
+  -webkit-text-fill-color: #e8eaed;
 }
 
 body.dark-mode .sig-canvas-wrap {
