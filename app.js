@@ -39,7 +39,6 @@ const state = {
     schoolName: '',
     dhName: '',
     logoDataUrl: null,
-    darkMode: false,
     firstLaunch: true
   },
   toggleValues: {},   /* field → 'YES' | 'NO' | null */
@@ -53,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initInstallBanner();
   setupInstallButton();
   loadSettings();
-  setupDarkMode();
   updateHeader();
   setupSettings();
   setupSettingsInstallBtn();
@@ -346,7 +344,6 @@ function openSettings() {
     removeLogo.classList.add('hidden');
   }
   logoInput._pendingUrl = undefined; /* reset pending */
-  document.getElementById('setting-dark-mode').checked = !!state.settings.darkMode;
 
   overlay.classList.remove('hidden');
   nameInput.focus();
@@ -354,26 +351,6 @@ function openSettings() {
 
 function closeSettings() {
   document.getElementById('settings-overlay').classList.add('hidden');
-}
-
-/* ── Dark Mode ───────────────────────────────────────────── */
-function applyDarkMode(enabled) {
-  document.body.classList.toggle('dark-mode', enabled);
-}
-
-function setupDarkMode() {
-  applyDarkMode(state.settings.darkMode);
-
-  const toggle = document.getElementById('setting-dark-mode');
-  if (!toggle) return;
-
-  toggle.checked = state.settings.darkMode;
-
-  toggle.addEventListener('change', () => {
-    state.settings.darkMode = toggle.checked;
-    applyDarkMode(toggle.checked);
-    persistSettings();
-  });
 }
 
 /* Pre-fill form fields from settings when the fields are currently empty */
