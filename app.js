@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   updateHeader();
   setupSettings();
+  setupSettingsInstallBtn();
   setupToggleSwitches();
   setupNavigation();
   setupSectionActions();
@@ -213,6 +214,32 @@ function updateHeader() {
   /* Keep data-school on form sections for print CSS ::before */
   document.querySelectorAll('.form-section').forEach(s => {
     s.setAttribute('data-school', name);
+  });
+}
+
+function setupSettingsInstallBtn() {
+  const btn = document.getElementById('settings-install-btn');
+  const group = document.getElementById('settings-install-group');
+  if (!btn) return;
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true
+    || window.matchMedia('(display-mode: standalone)').matches;
+
+  if (isStandalone) { group.style.display = 'none'; return; }
+  if (!isIOS && !_androidInstallPrompt) { group.style.display = 'none'; return; }
+
+  btn.addEventListener('click', () => {
+    if (_androidInstallPrompt) {
+      _androidInstallPrompt.prompt();
+      _androidInstallPrompt.userChoice.then(() => {
+        _androidInstallPrompt = null;
+        group.style.display = 'none';
+      });
+    } else if (isIOS) {
+      closeSettings();
+      document.getElementById('ios-install-modal').classList.remove('hidden');
+    }
   });
 }
 
