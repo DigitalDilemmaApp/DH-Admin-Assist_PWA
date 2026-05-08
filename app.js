@@ -226,8 +226,10 @@ function setupSettingsInstallBtn() {
   const isStandalone = window.navigator.standalone === true
     || window.matchMedia('(display-mode: standalone)').matches;
 
+  const isAndroid = /android/i.test(navigator.userAgent);
+
   if (isStandalone) { group.style.display = 'none'; return; }
-  if (!isIOS && !_androidInstallPrompt) { group.style.display = 'none'; return; }
+  if (!isIOS && !isAndroid) { group.style.display = 'none'; return; }
 
   btn.addEventListener('click', () => {
     if (_androidInstallPrompt) {
@@ -236,6 +238,8 @@ function setupSettingsInstallBtn() {
         _androidInstallPrompt = null;
         group.style.display = 'none';
       });
+    } else if (isAndroid) {
+      alert('To install: tap the browser menu (⋮) then "Add to Home Screen".');
     } else if (isIOS) {
       closeSettings();
       document.getElementById('ios-install-modal').classList.remove('hidden');
